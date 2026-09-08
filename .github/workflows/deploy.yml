@@ -27,7 +27,7 @@ jobs:
       - name: Check links and image references
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --no-progress --exclude-mail '*.html'
+          args: --no-progress '*.html'
           fail: true
 
   deploy:
