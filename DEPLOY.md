@@ -4,7 +4,9 @@
 - `index.html` — homepage
 - `about.html` — about page
 - `css/style.css` — all styling (single file, no build step, no external fonts/images)
+- `js/main.js` — small vanilla JS polish layer: scroll-reveal animations and a header shadow-on-scroll effect. No framework, nothing to install. Fully respects visitors who have "reduce motion" turned on at the OS level — for them, everything just appears instantly with no animation.
 - `CNAME` — tells GitHub Pages to serve this repo at `ylstandard.com`
+- `.github/workflows/deploy.yml` — tests then deploys on push (see the CI/CD section below)
 
 No hero photo is included on purpose — the original was a generic stock image hosted on Squarespace's own CDN, and hotlinking it would likely break once you cancel Squarespace. The hero now uses a plain CSS gradient instead, so there's nothing to break and nothing to re-host.
 
@@ -56,11 +58,25 @@ Remove any existing A/CNAME records Squarespace put there for hosting the old si
 - Check both pages, check the padlock/HTTPS is working, check on mobile.
 - Only after this all checks out, downgrade or cancel the Squarespace website plan. Keep the domain itself on Squarespace Domains (or transfer it later if you want) — you are only dropping the website hosting piece, not the domain registration.
 
-## Ongoing edits
-There's no CMS here — to change copy, edit the HTML files directly and push:
+## Ongoing edits (now tested before they publish)
+A GitHub Actions workflow lives at `.github/workflows/deploy.yml`. It does two things:
+
+1. **Checks for broken links and image/script references** across the HTML files (using the `lychee` link checker) — the realistic failure mode for a hand-edited HTML site: a typo'd `href`, a renamed file nothing points to anymore, a missing image or script.
+2. **Deploys to GitHub Pages** — but only if that check passes, and only on an actual push to `main` (not on pull requests, which only get the check).
+
+This does NOT catch visual/layout mistakes or bad copy — there's no way to "unit test" what a webpage looks like. It only catches the mechanical stuff: dead links and missing files.
+
+### One-time setup required
+This workflow deploys through GitHub Actions, a different path than "Deploy from a branch." Before it will actually publish anything:
+1. Repo **Settings → Pages → Source** → change to **"GitHub Actions"**.
+2. Push this workflow file to `main` (or open a PR — the test job runs either way).
+
+### Everyday edit workflow
 ```
+git checkout -b update-copy
+# edit index.html / about.html / css/style.css / js/main.js
 git add .
 git commit -m "Update copy"
-git push
+git push -u origin update-copy
 ```
-GitHub Pages redeploys automatically within a minute or two of a push to `main`.
+Open a pull request into `main`. Once the link check passes and you merge, it deploys automatically. Pushing straight to `main` still works too — it's just gated by the same check, after the fact rather than before.
